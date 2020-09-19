@@ -1,0 +1,3 @@
+open clinictech@www.scilpru.in.th
+synchronize remote "." "/api" -delete -filemask=*/|.gitignore;deploy.bat;deploy-script.txt;README.md;.git/
+exit
