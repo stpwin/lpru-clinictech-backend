@@ -13,13 +13,15 @@ $downloads = new Downloads($db);
 $stmt = $downloads->read();
 $num = $stmt->rowCount();
 
-function map_callback($fileName, $fileUrl, $created)
+function map_callback($id, $fileName, $fileUrl, $created)
 {
-  return array(
-    "name" => $fileName,
-    "url" => $fileUrl,
-    "created" => $created
-  );
+    if (empty($fileName)) return;
+    return array(
+        "id" => $id,
+        "name" => $fileName,
+        "url" => $fileUrl,
+        "created" => $created
+    );
 }
 
 if ($num > 0)
@@ -28,7 +30,7 @@ if ($num > 0)
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
         extract($row);
-        $files = array_map('map_callback', explode(",", $fileNames), explode(",", $fileUrls), explode(",", $createds));
+        $files = array_filter(array_map('map_callback', explode(",", $fileIDs), explode(",", $fileNames), explode(",", $fileUrls), explode(",", $createds)));
         $downloads_item=array(
             "id" => $id,
             "title" => $title,

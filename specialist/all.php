@@ -15,6 +15,7 @@ $num = $stmt->rowCount();
 
 function map_callback($image, $name, $phone, $email, $place)
 {
+    if (empty($name)) return;
     return array(
         "image" => $image,
         "name" => $name,
@@ -30,7 +31,7 @@ if ($num > 0)
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
         extract($row);
-        $owners = array_map('map_callback', explode(",", $images), explode(",", $names), explode(",", $phones), explode(",", $emails), explode(",", $places));
+        $owners = array_filter(array_map('map_callback', explode(",", $images), explode(",", $names), explode(",", $phones), explode(",", $emails), explode(",", $places)));
         $specialist_item=array(
             "id" => $id,
             "title" => $title,

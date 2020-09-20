@@ -1,15 +1,16 @@
 <?php
 require_once "../checks.php";
-// show error reporting
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-  
+
 // home page url
 if (isProduction())
 {
   $home_url="http://www.clinictech.scilpru.in.th/api/";
+  ini_set('display_errors', 0);
 } else {
   $home_url="http://clinictech.local/";
+  // show error reporting
+  ini_set('display_errors', 1);
+  error_reporting(E_ALL);
 }
 
   

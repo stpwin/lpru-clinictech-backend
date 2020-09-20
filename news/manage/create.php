@@ -32,7 +32,7 @@ if(
     $news->subtitle = $data->subtitle;
     $news->thumdbImg = $data->thumdbImg;
     $news->linkTo = $data->linkTo;
-    $news->created = date('Y-m-d H:i:s');
+    // $news->created = date('Y-m-d H:i:s');
   
     // create the news
     if($news->create()){
