@@ -190,6 +190,210 @@ class Specialist
     return false;
   }
 
+  function readAllOwners(){
+    $query = "SELECT o.id, o.name, o.image, o.email, o.phone, o.place
+    FROM owner o
+    ORDER BY o.created DESC";
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->execute();
+    return $stmt;
+  }
+
+  function readOwners($except){
+    if (empty($except)){
+      return $this->readAllOwners();
+    }
+    $query = "SELECT o.id, o.name, o.image
+    FROM owner o
+    WHERE o.id NOT IN (SELECT so.ownerID FROM specialist_owner so WHERE so.specialistID=:specialistID)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":specialistID", $except);
+
+    $stmt->execute();
+    return $stmt;
+  }
+
+  function readOwnerByID($id){
+    $query = "SELECT o.id, o.image, o.name, o.phone, o.email, o.place
+    FROM owner o
+    WHERE o.id=:id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id);
+
+    $stmt->execute();
+    return $stmt;
+  }
+
+  function addOwner($ownerID){
+    $query = "INSERT INTO specialist_owner
+    SET specialistID=:specialistID, ownerID=:ownerID";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(":specialistID", $this->id);
+    $stmt->bindParam(":ownerID", htmlspecialchars(strip_tags($ownerID)));
+
+    try {
+      $stmt->execute();
+      return true;//$this->conn->lastInsertId();
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+    return false;
+  }
+
+  function createOwner($owner){
+    $query = "INSERT INTO owner
+    SET email=:email, name=:name, phone=:phone, place=:place, image=:image";
+
+    $stmt = $this->conn->prepare($query);
+
+    $owner->email=htmlspecialchars(strip_tags($owner->email));
+    $owner->name=htmlspecialchars(strip_tags($owner->name));
+    $owner->phone=htmlspecialchars(strip_tags($owner->phone));
+    $owner->place=htmlspecialchars(strip_tags($owner->place));
+    $owner->image=htmlspecialchars(strip_tags($owner->image));
+
+    $stmt->bindParam(":email", $owner->email);
+    $stmt->bindParam(":name", $owner->name);
+    $stmt->bindParam(":phone", $owner->phone);
+    $stmt->bindParam(":place", $owner->place);
+    $stmt->bindParam(":image", $owner->image);
+    
+
+    try {
+      $stmt->execute();
+      return $this->conn->lastInsertId();
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateOwner($owner){
+    $query = "UPDATE owner
+    SET email=:email, name=:name, phone=:phone, place=:place
+    WHERE id=:id";
+
+    $stmt = $this->conn->prepare($query);
+
+    $owner->email=htmlspecialchars(strip_tags($owner->email));
+    $owner->name=htmlspecialchars(strip_tags($owner->name));
+    $owner->phone=htmlspecialchars(strip_tags($owner->phone));
+    $owner->place=htmlspecialchars(strip_tags($owner->place));
+    // $owner->image=htmlspecialchars(strip_tags($owner->image));
+
+    $stmt->bindParam(":email", $owner->email);
+    $stmt->bindParam(":name", $owner->name);
+    $stmt->bindParam(":phone", $owner->phone);
+    $stmt->bindParam(":place", $owner->place);
+    // $stmt->bindParam(":image", $owner->image);
+    $stmt->bindParam(":id", $owner->id);
+    
+
+    try {
+      $stmt->execute();
+      return true;
+      // return $this->conn->lastInsertId();
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateOwnerImage($id, $image){
+    $query = "UPDATE owner
+    SET image=:image
+    WHERE id=:id";
+
+    $stmt = $this->conn->prepare($query);
+    $image=htmlspecialchars(strip_tags($image));
+
+    $stmt->bindParam(":image", $image);
+    $stmt->bindParam(":id", $id);
+
+    try {
+      $stmt->execute();
+      return true;
+      // return $this->conn->lastInsertId();
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+    return false;
+  }
+
+  function removeOwner($id){
+    $query = "DELETE FROM owner
+    WHERE id=:id";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(":id", $id);
+
+    try {
+      $stmt->execute();
+      // $this->id = $this->conn->lastInsertId();
+      return true;
+    } catch (PDOException $e) {
+      $this->error = "ผิดพลาด";
+      if (ini_get('display_errors')){
+        $this->error = $e->getMessage();
+      }
+    }
+    return false;
+  }
+
+  
+  function removeOwnerSpecialist($id){
+    $query = "DELETE FROM specialist_owner
+    WHERE ownerID=:id";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(":id", $id);
+
+    try {
+      $stmt->execute();
+      // $this->id = $this->conn->lastInsertId();
+      return true;
+    } catch (PDOException $e) {
+      $this->error = "ผิดพลาด";
+      if (ini_get('display_errors')){
+        $this->error = $e->getMessage();
+      }
+    }
+    return false;
+  }
+
 }
   
 ?>
