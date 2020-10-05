@@ -39,6 +39,17 @@ class Utilities
         // json format
         return $paging_arr;
     }
+
+    public function getLastInsertDate($conn, $table_name, $id){
+        $query = "SELECT created
+        FROM {$table_name}
+        WHERE id=:id";
+        $stm = $conn->prepare($query);
+        $stm->bindParam(":id", $id);
+        $stm->execute();
+        $row = $stm->fetch(PDO::FETCH_ASSOC);
+        return $row['created'];
+      }
   
 }
 ?>

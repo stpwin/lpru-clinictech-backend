@@ -7,32 +7,26 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 include_once '../../config/db.php';
-include_once '../../objects/news.php';
+include_once '../../objects/gallery.php';
 
 $database = new Database();
 $db = $database->getConnection();
-
-$news = new News($db);
-
+  
+$gallery = new Gallery($db);
+  
 $data = json_decode(file_get_contents("php://input"));
+  
+$gallery->id = $data->id;
+$gallery->_public = $data->_public;
 
-$news->id = $data->id;
 
-sleep(1);
-// http_response_code(200);
-// echo json_encode(array("message" => "ok"));
-// return;
-// http_response_code(503);
-// echo json_encode(array("error" => "ผิดพลาดจ้าาา"));
-// return;
-
-// delete the news
-if($news->delete()){
+if($gallery->setPublic()){
+    sleep(1);
     http_response_code(200);
-    echo json_encode(array("message" => "ok"));
+    echo json_encode(array("message" => "ok", "_public"=> filter_var($data->_public, FILTER_VALIDATE_BOOLEAN)));
 }
-else{
+else
+{
     http_response_code(503);
-    echo json_encode(array("error" => $news->error));
+    echo json_encode(array("error" => "ผิดพลาด"));
 }
-?>

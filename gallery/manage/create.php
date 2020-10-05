@@ -10,14 +10,14 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include_once '../../config/db.php';
   
 // instantiate product object
-include_once '../../objects/news.php';
+include_once '../../objects/gallery.php';
 include_once '../../shared/utilities.php';
   
 $database = new Database();
 $db = $database->getConnection();
 
 $utilities = new Utilities();
-$news = new News($db);
+$gallery = new Gallery($db);
   
 // get posted data
 $data = json_decode(file_get_contents("php://input"));
@@ -26,23 +26,21 @@ $data = json_decode(file_get_contents("php://input"));
 if(
     !empty($data->title)
 ){
-    $news->title = $data->title;
-    $news->subtitle = $data->subtitle;
-    $news->thumdbImg = $data->thumdbImg;
-    $news->_public = $data->_public;
-    // $news->linkTo = $data->linkTo;
+    $gallery->title = $data->title;
+    $gallery->subtitle = $data->subtitle;
+    $gallery->thumdbImg = $data->thumdbImg;
   
     // create the news
-    if($news->create())
+    if($gallery->create())
     {
-        $news->created = $utilities->getLastInsertDate($db, $news->table_name, $news->id);
+        $gallery->created = $utilities->getLastInsertDate($db, $gallery->table_name, $gallery->id);
         http_response_code(201);
-        echo json_encode(array("id" => $news->id, "message" => "ok", "created" => $news->created));
+        echo json_encode(array("id" => $gallery->id, "message" => "ok", "created" => $gallery->created));
     }
     else
     {
         http_response_code(503);
-        echo json_encode(array("error" => $news->error));
+        echo json_encode(array("error" => $gallery->error));
     }
 }
 else

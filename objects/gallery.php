@@ -3,17 +3,17 @@ class Gallery
 {
     // database connection and table name
     private $conn;
-    private $table_name = "gallery";
+    public $table_name = "gallery";
   
     // object properties
     public $id;
     public $title;
     public $subtitle;
     public $thumdbImg;
-    // public $linkTo;
     public $imageCount;
     public $images;
     public $created;
+    public $_public;
   
     // constructor with $db as database connection
     public function __construct($db){
@@ -24,7 +24,10 @@ class Gallery
   function read(){
   
     // select all query
-    $query = "SELECT id, title, subtitle, thumdbImg, imageCount, created FROM {$this->table_name} ORDER BY created DESC";
+    $query = "SELECT id, title, subtitle, thumdbImg, imageCount, created
+    FROM {$this->table_name}
+    WHERE _public=1
+    ORDER BY created DESC";
   
     // prepare query statement
     $stmt = $this->conn->prepare($query);
@@ -35,38 +38,79 @@ class Gallery
     return $stmt;
   }
 
-  // create news
-  function create(){
-  
-    // query to insert record
-    $query = "INSERT INTO {$this->table_name} SET title=:title, subtitle=:subtitle, thumdbImg=:thumdbImg";
-  
-    // prepare query
+  function readManage(){
+    $query = "SELECT id, title, subtitle, thumdbImg, imageCount, created, _public
+    FROM {$this->table_name}
+    ORDER BY created DESC";
+
     $stmt = $this->conn->prepare($query);
+
+    $stmt->execute();
   
-    // sanitize
+    return $stmt;
+  }
+
+  // create gallery
+  function create(){
+    $query = "INSERT INTO {$this->table_name}
+    SET title=:title, subtitle=:subtitle, thumdbImg=:thumdbImg";
+  
+    $stmt = $this->conn->prepare($query);
+    
+
     $this->title=htmlspecialchars(strip_tags($this->title));
     $this->subtitle=htmlspecialchars(strip_tags($this->subtitle));
     $this->thumdbImg=htmlspecialchars(strip_tags($this->thumdbImg));
-    // $this->linkTo=htmlspecialchars(strip_tags($this->linkTo));
-    // $this->imageCount=htmlspecialchars(strip_tags($this->imageCount));
-    $this->images=htmlspecialchars(strip_tags($this->images));
   
     // bind values
     $stmt->bindParam(":title", $this->title);
     $stmt->bindParam(":subtitle", $this->subtitle);
     $stmt->bindParam(":thumdbImg", $this->thumdbImg);
-    // $stmt->bindParam(":linkTo", $this->linkTo);
-    // $stmt->bindParam(":imageCount", $this->imageCount);
-    // $stmt->bindParam(":images", $this->images);
-  
+
     // execute query
-    if($stmt->execute()){
-        return true;
+    try {
+      $stmt->execute();
+      $this->id = $this->conn->lastInsertId();
+      return true;
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+        }
+      }
     }
-  
     return false;
-      
+  }
+
+  function setPublic(){
+    $query = "UPDATE {$this->table_name}
+    SET _public = :_public
+    WHERE id = :id";
+  
+    // prepare query statement
+    $stmt = $this->conn->prepare($query);
+  
+    // sanitize
+    $this->_public=htmlspecialchars(strip_tags($this->_public));
+    $this->id=htmlspecialchars(strip_tags($this->id));
+  
+    // bind new values
+    $stmt->bindParam(':_public', $this->_public);
+    $stmt->bindParam(':id', $this->id);
+  
+    // execute the query
+    try {
+      $stmt->execute();
+      return true;
+    } catch (PDOException $e) {
+      $this->error = "ผิดพลาด";
+      if (ini_get('display_errors')){
+        $this->error = $e->getMessage();
+      }
+    }
+    return false;
   }
 
   // used when filling up the update news form
@@ -105,7 +149,9 @@ class Gallery
   function update(){
   
     // update query
-    $query = "UPDATE {$this->table_name} SET title = :title, subtitle = :subtitle, thumdbImg = :thumdbImg WHERE id = :id";
+    $query = "UPDATE {$this->table_name}
+    SET title = :title, subtitle = :subtitle
+    WHERE id = :id";
   
     // prepare query statement
     $stmt = $this->conn->prepare($query);
@@ -113,34 +159,62 @@ class Gallery
     // sanitize
     $this->title=htmlspecialchars(strip_tags($this->title));
     $this->subtitle=htmlspecialchars(strip_tags($this->subtitle));
-    $this->thumdbImg=htmlspecialchars(strip_tags($this->thumdbImg));
-    // $this->linkTo=htmlspecialchars(strip_tags($this->linkTo));
-    $this->imageCount=htmlspecialchars(strip_tags($this->imageCount));
-    $this->images=htmlspecialchars(strip_tags($this->images));
     $this->id=htmlspecialchars(strip_tags($this->id));
   
     // bind new values
     $stmt->bindParam(':title', $this->title);
     $stmt->bindParam(':subtitle', $this->subtitle);
-    $stmt->bindParam(':thumdbImg', $this->thumdbImg);
-    // $stmt->bindParam(':linkTo', $this->linkTo);
-    // $stmt->bindParam(':imageCount', $this->imageCount);
-    $stmt->bindParam(':images', $this->images);
     $stmt->bindParam(':id', $this->id);
   
     // execute the query
-    if($stmt->execute()){
-        return true;
+    try {
+      $stmt->execute();
+      return true;
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
     }
   
     return false;
   }
 
+  function updateImage(){
+    $query = "UPDATE {$this->table_name}
+    SET thumdbImg=:thumdbImg
+    WHERE id=:id";
+
+    $stmt = $this->conn->prepare($query);
+    $this->thumdbImg=htmlspecialchars(strip_tags($this->thumdbImg));
+
+    $stmt->bindParam(":thumdbImg", $this->thumdbImg);
+    $stmt->bindParam(":id", $this->id);
+
+    try {
+      $stmt->execute();
+      return true;
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+    return false;
+  }
+  
   // delete the news
   function delete(){
-  
-    // delete query
-    $query = "DELETE FROM {$this->table_name} WHERE id = ?";
+    $query = "DELETE FROM {$this->table_name}
+    WHERE id = ?";
   
     // prepare query
     $stmt = $this->conn->prepare($query);
@@ -152,8 +226,17 @@ class Gallery
     $stmt->bindParam(1, $this->id);
   
     // execute query
-    if($stmt->execute()){
-        return true;
+    try {
+      $stmt->execute();
+      return true;
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+        }
+      }
     }
   
     return false;
