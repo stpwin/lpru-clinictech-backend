@@ -26,27 +26,18 @@ $news->readOne();
 if($news->title!=null){
     // create array
     $news_arr = array(
-        // "id" =>  $news->id,
         "title" => $news->title,
         "subtitle" => $news->subtitle,
-        // "thumdbImg" => $news->thumdbImg,
-        // "linkTo" => $news->linkTo,
         "content" => $news->content,
         "created" => $news->created
     );
   
-    // set response code - 200 OK
     http_response_code(200);
-  
-    // make it json format
     echo json_encode($news_arr);
 }
 else
 {
-    // set response code - 404 Not found
     http_response_code(404);
-  
-    // tell the user news does not exist
-    echo json_encode(array("message" => "News does not exist."));
+    echo json_encode(array("error" => "News does not exist."));
 }
 ?>

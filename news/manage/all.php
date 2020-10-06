@@ -1,15 +1,9 @@
 <?php
-// include database and object files
+include_once '../../config/core.php';
 include_once '../../config/db.php';
 include_once '../../objects/news.php';
-
-// required headers
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Connection: close");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
+include_once '../../shared/header.php';
+include_once '../../verify/middleware.php';
 
 $database = new Database();
 $db = $database->getConnection();

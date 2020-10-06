@@ -84,7 +84,10 @@ class News
   function readOne(){
   
     // query to read single record
-    $query = "SELECT title, content, created FROM {$this->table_name} WHERE id = ? LIMIT 0,1";
+    $query = "SELECT title, content, created
+    FROM {$this->table_name} 
+    WHERE id = ? AND _public=1
+    LIMIT 0,1";
   
     // prepare query statement
     $stmt = $this->conn->prepare($query);
@@ -93,15 +96,22 @@ class News
     $stmt->bindParam(1, $this->id);
   
     // execute query
-    $stmt->execute();
+    try {
+      $stmt->execute();
+      
+    } catch (PDOException $e) {
+      $this->error = "ผิดพลาด";
+      if (ini_get('display_errors')){
+        $this->error = $e->getMessage();
+      }
+      return false;
+    }
   
     // get retrieved row
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     // set values to object properties
     $this->title = $row['title'];
-    // $this->subtitle = $row['subtitle'];
-    // $this->thumdbImg = $row['thumdbImg'];
-    // $this->linkTo = $row['linkTo'];
+
     $this->content = $row['content'];
     $this->created = $row['created'];
   }

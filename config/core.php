@@ -1,5 +1,28 @@
 <?php
-require_once "../checks.php";
+
+if (!function_exists('isProduction')){
+  function isProduction()
+  {
+    if (isset($_ENV['PATH'])){
+      return $_ENV['PATH'] == '/usr/local/bin:/usr/bin:/bin';
+    }
+  }
+}
+
+if (!function_exists('http_response_code'))
+{
+    function http_response_code($newcode = NULL)
+    {
+        static $code = 200;
+        if($newcode !== NULL)
+        {
+            header('X-PHP-Response-Code: '.$newcode, true, $newcode);
+            if(!headers_sent())
+                $code = $newcode;
+        }       
+        return $code;
+    }
+}
 
 // home page url
 if (isProduction())

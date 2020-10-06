@@ -1,7 +1,5 @@
 <?php
-// include_once "config.production.php";
-require_once dirname(__FILE__) . "/../checks.php";
-
+include_once 'core.php';
 class Database
 {
     // specify your own database credentials

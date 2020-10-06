@@ -120,7 +120,7 @@ class Gallery
     $query = "SELECT g.title, g.subtitle, g.imageCount, g.created, GROUP_CONCAT(gi.imageUrl) AS images
     FROM {$this->table_name} g
     JOIN {$this->table_name}_images gi ON g.id=gi.galleryID
-    WHERE g.id = ?
+    WHERE g.id = ? AND g._public=1
     ORDER BY g.id
     LIMIT 0,1";
   
@@ -131,15 +131,22 @@ class Gallery
     $stmt->bindParam(1, $this->id);
   
     // execute query
-    $stmt->execute();
+    try {
+      $stmt->execute();
+      
+    } catch (PDOException $e) {
+      $this->error = "ผิดพลาด";
+      if (ini_get('display_errors')){
+        $this->error = $e->getMessage();
+      }
+      return false;
+    }
   
     // get retrieved row
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     // set values to object properties
     $this->title = $row['title'];
     $this->subtitle = $row['subtitle'];
-    // $this->thumdbImg = $row['thumdbImg'];
-    // $this->linkTo = $row['linkTo'];
     $this->imageCount = $row['imageCount'];
     $this->images = explode(",", $row['images']);
     $this->created = $row['created'];

@@ -26,24 +26,18 @@ $gallery->readOne();
 if($gallery->title!=null){
     // create array
     $gallery_arr = array(
-        // "id" =>  $gallery->id,
         "title" => $gallery->title,
         "subtitle" => $gallery->subtitle,
-        // "thumdbImg" => $gallery->thumdbImg,
-        // "linkTo" => $gallery->linkTo,
         "images" => $gallery->images,
         "created" => $gallery->created
     );
   
-    // set response code - 200 OK
     http_response_code(200);
-  
-    // make it json format
     echo json_encode($gallery_arr);
 }
 else
 {
     http_response_code(404);
-    echo json_encode(array("message" => "Gallery does not exist."));
+    echo json_encode(array("error" => "Gallery does not exist."));
 }
 ?>

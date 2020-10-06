@@ -1,17 +1,12 @@
 <?php
+include_once '../../shared/header.php';
 include_once '../../config/db.php';
 include_once '../../objects/specialist.php';
-
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Connection: close");
+include_once '../../verify/middleware.php';
 
 $database = new Database();
 $db = $database->getConnection();
-  
 $specialist = new Specialist($db);
-
-$data = json_decode(file_get_contents("php://input"));
 
 $stmt = $specialist->readOwnerByID($data->id);
 $num = $stmt->rowCount();
