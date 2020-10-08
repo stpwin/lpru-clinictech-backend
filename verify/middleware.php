@@ -15,7 +15,7 @@ $id_token = get_header("X-Token");
 if (!empty($id_token)){
     if (!$auth->verify($id_token)) {
         http_response_code(406);
-        echo json_encode(array("error" => "token verify fail"));
+        echo json_encode(array("error" => "Token is not valid: ".$auth->lastError));
         die();
     }
 

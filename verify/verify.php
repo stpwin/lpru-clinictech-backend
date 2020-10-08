@@ -6,6 +6,7 @@ class FirebaseToken
     private $project_id;
     private $public_key;
     private $jwtInstance;
+    public $lastError;
 
     public function __construct(){
         $pkeys_raw = file_get_contents("../../config/firebase-adminsdk.json");
@@ -23,9 +24,9 @@ class FirebaseToken
     private function bool2Str($b){
         return $b ? 'true' : 'false';
     }
-    
 
     public function verify($idToken){
+        $curTime = time();
         $decoded = $this->jwtInstance->decode($idToken, $this->public_key, false);
         $iss = $decoded["iss"];
         $exp = $decoded["exp"];
@@ -33,11 +34,17 @@ class FirebaseToken
         $aud = $decoded["aud"];
         $sub = $decoded["sub"];
 
-        $exp_is_valid = isset($exp) && $exp > time();
-        $iat_is_valid = isset($iat) && $iat < time();
+        $exp_is_valid = isset($exp) && $exp > $curTime;
+        $iat_is_valid = isset($iat) && $iat <= $curTime;
         $aud_is_valid = isset($aud) && $aud == $this->project_id;
         $iss_is_valid = isset($iss) && $iss === "https://securetoken.google.com/".$this->project_id;
+        $sub_is_valid = isset($sub);
 
+        $this->lastError = "exp: ".$this->bool2Str($exp_is_valid)."[$exp > $curTime]".
+        ", iat: ".$this->bool2Str($iat_is_valid)."[$iat <= $curTime]".
+        ", aud: ".$this->bool2Str($aud_is_valid).
+        ", iss: ".$this->bool2Str($iss_is_valid).
+        ", sub: ".$this->bool2Str($sub_is_valid);
         // $exp_is_valid = $this->bool2Str($exp_is_valid);
         // $iat_is_valid = $this->bool2Str($iat_is_valid);
         // $aud_is_valid = $this->bool2Str($aud_is_valid);
@@ -56,7 +63,7 @@ class FirebaseToken
         // print_r("aud_is_valid: $aud_is_valid\n");
         // print_r("iss_is_valid: $iss_is_valid\n");
 
-        return ($exp_is_valid && $iat_is_valid && $aud_is_valid && $iss_is_valid);
+        return ($exp_is_valid && $iat_is_valid && $aud_is_valid && $iss_is_valid && $sub_is_valid);
     }
 
 
