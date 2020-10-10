@@ -117,11 +117,12 @@ class Gallery
   function readOne(){
   
     // query to read single record
-    $query = "SELECT g.title, g.subtitle, g.imageCount, g.created, GROUP_CONCAT(gi.imageUrl) AS images
+    $query = "SELECT g.title, g.subtitle, g.created
+    /* , GROUP_CONCAT(gi.imageUrl) AS images */
     FROM {$this->table_name} g
-    JOIN {$this->table_name}_images gi ON g.id=gi.galleryID
+    /* JOIN {$this->table_name}_images gi ON g.id=gi.galleryID */
     WHERE g.id = ? AND g._public=1
-    ORDER BY g.id
+    /* ORDER BY g.id */
     LIMIT 0,1";
   
     // prepare query statement
@@ -147,8 +148,8 @@ class Gallery
     // set values to object properties
     $this->title = $row['title'];
     $this->subtitle = $row['subtitle'];
-    $this->imageCount = $row['imageCount'];
-    $this->images = explode(",", $row['images']);
+    // $this->imageCount = $row['imageCount'];
+    // $this->images = explode(",", $row['images']);
     $this->created = $row['created'];
   }
 

@@ -28,7 +28,7 @@ if($gallery->title!=null){
     $gallery_arr = array(
         "title" => $gallery->title,
         "subtitle" => $gallery->subtitle,
-        "images" => $gallery->images,
+        // "images" => $gallery->images,
         "created" => $gallery->created
     );
   
