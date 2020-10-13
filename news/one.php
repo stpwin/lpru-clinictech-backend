@@ -1,12 +1,5 @@
 <?php
-// required headers
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: access");
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Credentials: true");
-header('Content-Type: application/json');
-  
-// include database and object files
+include_once '../shared/header.php';
 include_once '../config/db.php';
 include_once '../objects/news.php';
   
@@ -28,7 +21,7 @@ if($news->title!=null){
     $news_arr = array(
         "title" => $news->title,
         "subtitle" => $news->subtitle,
-        "content" => $news->content,
+        "content" => htmlspecialchars_decode($news->content),
         "created" => $news->created
     );
   

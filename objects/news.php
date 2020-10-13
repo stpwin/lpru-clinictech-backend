@@ -160,6 +160,43 @@ class News
     return false;
   }
 
+  function updateContent(){
+  
+    // update query
+    $query = "UPDATE {$this->table_name}
+    SET content=:content
+    WHERE id = :id";
+  
+    // prepare query statement
+    $stmt = $this->conn->prepare($query);
+  
+    // sanitize
+    $this->content=htmlspecialchars($this->content);
+    $this->id=htmlspecialchars(strip_tags($this->id));
+  
+    // bind new values
+    $stmt->bindParam(':content', $this->content);
+    $stmt->bindParam(':id', $this->id);
+  
+    // execute the query
+    try {
+      $stmt->execute();
+      return true;
+    } catch (PDOException $e) {
+      if ($e->getCode() == "23000"){
+        $this->error = "ซ้ำกับในระบบ";
+      } else {
+        if (ini_get('display_errors')){
+          $this->error = $e->getMessage();
+          // die($e->getMessage());
+        }
+      }
+    }
+  
+    return false;
+  }
+
+
   function delete(){
     $query = "DELETE FROM {$this->table_name}
     WHERE id = ?";
